@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Dashboard</h2>
+    {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('patients.create_patient') }}" class="btn btn-primary">New Patient</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">System Overview</h5>
+        <p class="card-text mb-1">Total patient records: <strong>{{ patients|length }}</strong></p>
+        <p class="card-text text-muted">Use the Patients page to view and manage records.</p>
+    </div>
+</div>
+{% endblock %}

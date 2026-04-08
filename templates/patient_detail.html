@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Patient Detail</h2>
+    <div>
+        <a href="{{ url_for('patients.edit_patient', patient_id=patient.id) }}" class="btn btn-warning">Edit</a>
+        <a href="{{ url_for('patients.patients') }}" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>ID:</strong> {{ patient.id }}</p>
+        <p><strong>Name:</strong> {{ patient.name }}</p>
+        <p><strong>Age:</strong> {{ patient.age }}</p>
+        <p><strong>Diagnosis:</strong> {{ patient.diagnosis }}</p>
+        <p><strong>Assigned Doctor:</strong> {{ patient.doctor_name or "Unassigned" }}</p>
+    </div>
+</div>
+{% endblock %}

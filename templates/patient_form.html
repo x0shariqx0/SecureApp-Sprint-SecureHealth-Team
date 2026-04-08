@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">{{ "Edit Patient" if patient else "New Patient" }}</h2>
+
+<form method="POST" action="{% if patient %}{{ url_for('patients.edit_patient', patient_id=patient.id) }}{% else %}{{ url_for('patients.create_patient') }}{% endif %}">
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" value="{{ patient.name if patient else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Age</label>
+        <input type="number" name="age" class="form-control" value="{{ patient.age if patient else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Diagnosis</label>
+        <textarea name="diagnosis" class="form-control" rows="4" required>{{ patient.diagnosis if patient else '' }}</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Assigned Doctor</label>
+        <select name="assigned_doctor_id" class="form-select">
+            <option value="">Select Doctor</option>
+            {% for doctor in doctors %}
+                <option value="{{ doctor.id }}" {% if patient and patient.assigned_doctor_id == doctor.id %}selected{% endif %}>
+                    {{ doctor.name }} (ID: {{ doctor.id }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('patients.patients') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
