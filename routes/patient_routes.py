@@ -6,27 +6,44 @@ from models import Patient, User
 patient_bp = Blueprint("patients", __name__)
 
 
+def can_access_patient(patient):
+    """Object-level authorization for patient records."""
+    if not patient:
+        return False
+    if session.get("role") == "admin":
+        return True
+    return patient["assigned_doctor_id"] == session.get("user_id")
+
+
 @patient_bp.route("/dashboard")
 @login_required
 def dashboard():
-    patients = Patient.all_records()
+    if session.get("role") == "admin":
+        patients = Patient.all_records()
+    else:
+        patients = Patient.records_for_doctor(session.get("user_id"))
     return render_template("dashboard.html", patients=patients)
 
 
 @patient_bp.route("/patients")
 @login_required
 def patients():
-    records = Patient.all_records()
+    if session.get("role") == "admin":
+        records = Patient.all_records()
+    else:
+        records = Patient.records_for_doctor(session.get("user_id"))
     return render_template("patients.html", patients=records)
 
 
 @patient_bp.route("/patients/<int:patient_id>")
 @login_required
 def patient_detail(patient_id):
-    # Intentional vulnerability (IDOR): no ownership check
     patient = Patient.find_by_id(patient_id)
     if not patient:
         flash("Patient record not found.", "warning")
+        return redirect(url_for("patients.patients"))
+    if not can_access_patient(patient):
+        flash("You are not authorized to view this patient record.", "danger")
         return redirect(url_for("patients.patients"))
     return render_template("patient_detail.html", patient=patient)
 
@@ -62,12 +79,14 @@ def create_patient():
 @patient_bp.route("/patients/<int:patient_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_patient(patient_id):
-    # Intentional vulnerability (IDOR): no ownership check
     patient = Patient.find_by_id(patient_id)
     doctors = User.all_doctors()
 
     if not patient:
         flash("Patient record not found.", "warning")
+        return redirect(url_for("patients.patients"))
+    if not can_access_patient(patient):
+        flash("You are not authorized to edit this patient record.", "danger")
         return redirect(url_for("patients.patients"))
 
     if request.method == "POST":

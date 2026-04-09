@@ -32,6 +32,7 @@
                         <a href="{{ url_for('patients.edit_patient', patient_id=patient.id) }}" class="btn btn-sm btn-warning">Edit</a>
                         {% if session.get('role') == 'admin' %}
                             <form method="POST" action="{{ url_for('patients.delete_patient', patient_id=patient.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this record?')">Delete</button>
                             </form>
                         {% endif %}
@@ -46,3 +47,4 @@
     </table>
 </div>
 {% endblock %}
+

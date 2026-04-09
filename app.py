@@ -1,5 +1,6 @@
 from flask import Flask, redirect, session, url_for
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFError, CSRFProtect
 
 from config import Config
 from database import init_db, seed_db
@@ -12,6 +13,7 @@ def create_app():
 
     app = Flask(__name__)
     app.config.from_object(Config)
+    CSRFProtect(app)
 
     init_db()
 
@@ -21,6 +23,17 @@ def create_app():
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(patient_bp)
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(error):
+        return f"CSRF validation failed: {error.description}", 400
+
+    @app.after_request
+    def set_security_headers(response):
+        # Clickjacking protection
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Content-Security-Policy"] = "frame-ancestors 'none';"
+        return response
 
     @app.route("/")
     def index():

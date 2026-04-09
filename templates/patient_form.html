@@ -3,6 +3,7 @@
 <h2 class="mb-4">{{ "Edit Patient" if patient else "New Patient" }}</h2>
 
 <form method="POST" action="{% if patient %}{{ url_for('patients.edit_patient', patient_id=patient.id) }}{% else %}{{ url_for('patients.create_patient') }}{% endif %}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="mb-3">
         <label class="form-label">Name</label>
         <input type="text" name="name" class="form-control" value="{{ patient.name if patient else '' }}" required>
@@ -34,3 +35,4 @@
     <a href="{{ url_for('patients.patients') }}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %}
+

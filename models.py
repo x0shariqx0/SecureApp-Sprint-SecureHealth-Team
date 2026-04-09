@@ -59,6 +59,24 @@ class Patient:
         return patients
 
     @staticmethod
+    def records_for_doctor(doctor_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT p.*, u.name AS doctor_name
+            FROM patients p
+            LEFT JOIN users u ON p.assigned_doctor_id = u.id
+            WHERE p.assigned_doctor_id = ?
+            ORDER BY p.id DESC
+            """,
+            (doctor_id,),
+        )
+        patients = cursor.fetchall()
+        conn.close()
+        return patients
+
+    @staticmethod
     def find_by_id(patient_id):
         conn = get_db_connection()
         cursor = conn.cursor()
