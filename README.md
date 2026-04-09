@@ -1,79 +1,126 @@
-# Secure Patient Record System (Intentionally Vulnerable - Version 1)
+# Secure Patient Record System
 
-This is a minimal Flask web app for an academic security project.  
-It includes authentication, role-based UI behavior, and CRUD for patient records.
+A Flask-based patient management application for secure software development practice.  
+The project demonstrates role-based access, patient CRUD workflows, and practical security hardening against common web risks.
 
-## Stack
+## Highlights
 
-- Python
+- Role-based access control (`admin`, `doctor`)
+- Session-based authentication with hashed passwords
+- Patient record CRUD with object-level authorization
+- CSRF protection on state-changing requests (`Flask-WTF`)
+- Clickjacking defenses through response security headers
+- SQLite-backed persistence with optional seed data
+
+## Security Improvements Implemented
+
+- IDOR mitigation:
+  - Patient view/edit routes validate access using object-level checks.
+  - Doctors can access only patients assigned to them; admins can access all.
+- CSRF mitigation:
+  - `CSRFProtect` enabled at application level.
+  - CSRF failures are handled with explicit 400 responses.
+- Clickjacking mitigation:
+  - `X-Frame-Options: DENY`
+  - `Content-Security-Policy: frame-ancestors 'none';`
+
+## Tech Stack
+
+- Python 3
 - Flask
-- SQLite (`sqlite3`)
+- Flask-WTF
+- SQLite
 - Jinja2 templates
-- Bootstrap
-- Session-based authentication
-- `python-dotenv`
+- Bootstrap UI
+- python-dotenv
 
 ## Project Structure
 
 ```text
-project/
+SSD-Mid/
   app.py
   config.py
   database.py
   models.py
   requirements.txt
-  .env
   routes/
     auth_routes.py
     patient_routes.py
   middleware/
     auth_middleware.py
   templates/
-    base.html
-    login.html
-    register.html
-    dashboard.html
-    patients.html
-    patient_detail.html
-    patient_form.html
   static/
-    css/
-      style.css
+  docs/
+    PNE_Report.md
+    Threat_Model.pdf
+    diagrams/
 ```
 
-## Setup
+## Quick Start
 
-1. Create and activate a virtual environment.
-2. Install dependencies:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/x0shariqx0/SecureApp-Sprint-PatientRecordSystem.git
+   cd SecureApp-Sprint-PatientRecordSystem
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Run app:
+4. (Optional) Configure environment variables in `.env`.
+5. Run the app:
    ```bash
    python app.py
    ```
-4. Open:
-   `http://127.0.0.1:5000`
+6. Open:
+   - `http://127.0.0.1:5000`
 
-## Seed Data
+## Configuration
 
-If `SEED_DB=true` in `.env`, the app seeds:
+Environment variables used by `config.py`:
+
+- `SECRET_KEY` (default: `dev-insecure-secret-key`)
+- `DATABASE_PATH` (default: `patient_records.db`)
+- `SEED_DB` (default: `true`)
+
+Example `.env`:
+
+```env
+SECRET_KEY=replace-with-a-strong-secret
+DATABASE_PATH=patient_records.db
+SEED_DB=true
+```
+
+## Default Seed Accounts
+
+When `SEED_DB=true` and database is empty:
+
 - Admin: `admin@example.com` / `admin123`
 - Doctor: `doctor@example.com` / `doctor123`
-- 3 sample patient records
 
-## Intentional Vulnerabilities (for later fixing)
+## Core Routes
 
-1. IDOR (Insecure Direct Object Reference)
-- `/patients/<id>` and `/patients/<id>/edit` only check login.
-- No check that patient belongs to logged-in doctor.
+- Auth:
+  - `/login`
+  - `/register`
+  - `/logout`
+- App:
+  - `/dashboard`
+  - `/patients`
+  - `/patients/<id>`
+  - `/patients/new` (admin only)
+  - `/patients/<id>/edit`
+  - `/patients/<id>/delete` (admin only)
 
-2. CSRF
-- No CSRF tokens in any POST form.
-- POST endpoints accept requests without anti-CSRF protection.
+## Notes
 
-3. Clickjacking
-- No `X-Frame-Options` header.
-- No CSP `frame-ancestors` policy.
-
-Do not use this project in production.
+- This project is intended for educational and assessment use.
+- For production readiness, add:
+  - centralized logging and monitoring
+  - automated tests (unit/integration/security)
+  - stronger secret management and deployment hardening
